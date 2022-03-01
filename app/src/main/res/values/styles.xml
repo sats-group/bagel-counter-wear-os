@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="BagelTheme" parent="@android:style/Theme.DeviceDefault"/>
+
+    <style name="BagelTheme.Splash" parent="BagelTheme">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+    <style name="BagelTheme.Main" parent="BagelTheme">
+
+    </style>
+</resources>
