@@ -82,6 +82,14 @@ dependencies {
     // Glance For Wear-Tiles support
     implementation("androidx.glance:glance-wear-tiles:1.0.0-alpha03")
 
+    // Ongoing Activities
+    implementation "androidx.wear:wear-ongoing:1.0.0"
+    implementation "androidx.lifecycle:lifecycle-service:2.4.1"
+
+    // Includes LocusIdCompat and new Notification categories for Ongoing Activity.
+    implementation "androidx.core:core:1.7.0"
+
     // SignalR
     implementation("com.microsoft.signalr:signalr:6.0.1")
+
 }
