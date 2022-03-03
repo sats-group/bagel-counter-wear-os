@@ -53,7 +53,6 @@ class MainActivity : ComponentActivity() {
                 count = viewModel.counterValue
             )
         }
-
     }
 
     override fun onStart() {
@@ -61,7 +60,6 @@ class MainActivity : ComponentActivity() {
 
         val serviceIntent = Intent(this, BagelService::class.java)
         bindService(serviceIntent, bagelServiceConnection, Context.BIND_AUTO_CREATE)
-        bagelService?.startBagel()
     }
 
     override fun onStop() {

@@ -7,14 +7,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-interface BagelRepository {
-    val bagelCount: Flow<Int>
-}
-
-class BagelRepositoryImpl : BagelRepository {
+class BagelRepository {
     private val _bagelCount = Channel<Int>()
 
-    override val bagelCount: Flow<Int>
+    val bagelCount: Flow<Int>
         get() = _bagelCount.receiveAsFlow()
 
     private val hubConnection =
@@ -29,16 +25,5 @@ class BagelRepositoryImpl : BagelRepository {
             Int::class.java
         )
         hubConnection.start().blockingAwait()
-    }
-
-    companion object {
-        @Volatile private var INSTANCE: BagelRepositoryImpl? = null
-
-        fun getInstance(): BagelRepository {
-            return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: BagelRepositoryImpl()
-                    .also { INSTANCE = it }
-            }
-        }
     }
 }

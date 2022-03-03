@@ -16,15 +16,13 @@ import kotlinx.coroutines.flow.onEach
 
 class BagelService : LifecycleService() {
 
-    private val bagelRepository: BagelRepository by lazy {
-        (application as BagelApplication).repository
-    }
+    private val bagelRepository: BagelRepository = BagelRepository()
 
     private lateinit var notificationManager: NotificationManager
 
     private val notificationChannelId = "bagel_notification_id"
 
-    private val notificationId = 1
+    private val notificationId = 123
 
     private val localBinder = LocalBinder()
 
@@ -38,7 +36,9 @@ class BagelService : LifecycleService() {
 
         bagelRepository.bagelCount.onEach {
             println("Bagel count: $it")
-            val notification = generateNotification("Counter changed")
+            val notification = generateNotification(
+                baseContext.resources.getQuantityString(R.plurals.bagels_changed_notification, it, it)
+            )
             notificationManager.notify(notificationId, notification)
         }.launchIn(lifecycleScope)
     }
@@ -59,10 +59,12 @@ class BagelService : LifecycleService() {
         super.onUnbind(intent)
 
         if (!configurationChange) {
-            val notification = generateNotification("Bagel counter is running in background")
+            val notification =
+                generateNotification(baseContext.getString(R.string.bagel_counter_background_notification))
             startForeground(notificationId, notification)
             serviceRunningInForeground = true
         }
+        startBagel()
         return true
     }
 
@@ -83,14 +85,13 @@ class BagelService : LifecycleService() {
         configurationChange = false
     }
 
-    fun startBagel() {
+    private fun startBagel() {
         startService(Intent(applicationContext, BagelService::class.java))
+        println("Bagel foreground service started")
     }
 
-
-
     private fun generateNotification(message: String): Notification {
-        val title = "Bagel Counter"
+        val title = baseContext.getString(R.string.app_name)
 
         val notificationChannel = NotificationChannel(
             notificationChannelId,
@@ -106,7 +107,10 @@ class BagelService : LifecycleService() {
         val launchActivityIntent = Intent(this, MainActivity::class.java)
 
         val activityPendingIntent = PendingIntent.getService(
-            this, 0, launchActivityIntent, PendingIntent.FLAG_IMMUTABLE
+            this,
+            0,
+            launchActivityIntent,
+            PendingIntent.FLAG_IMMUTABLE
         )
 
         val notificationCompatBuilder =
@@ -119,7 +123,7 @@ class BagelService : LifecycleService() {
             .setSmallIcon(R.drawable.ic_bagel)
             .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setOngoing(true)
-            .setCategory(NotificationCompat.CATEGORY_WORKOUT)
+            .setCategory(NotificationCompat.CATEGORY_EVENT)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
         val ongoingActivityStatus = Status.Builder().addTemplate(message).build()
@@ -134,12 +138,10 @@ class BagelService : LifecycleService() {
         ongoingActivity.apply(applicationContext)
 
         return notificationBuilder.build()
-
     }
 
-    inner class LocalBinder: Binder() {
-        internal val bagelService : BagelService
+    inner class LocalBinder : Binder() {
+        internal val bagelService: BagelService
             get() = this@BagelService
     }
-
 }
