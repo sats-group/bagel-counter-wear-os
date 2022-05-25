@@ -1,6 +1,11 @@
 package com.sats.bagel.wear
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -17,6 +22,25 @@ import androidx.wear.compose.material.*
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<CounterViewModel>()
 
+    private var bagelService: BagelService? = null
+
+    private var bagelServiceBound = false
+
+    private val bagelServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            println("Service connected")
+            val binder = service as BagelService.LocalBinder
+            bagelService = binder.bagelService
+            bagelServiceBound = true
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            println("Service disconnected")
+            bagelService = null
+            bagelServiceBound = false
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.BagelTheme_Main)
@@ -30,6 +54,23 @@ class MainActivity : ComponentActivity() {
             )
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+
+        val serviceIntent = Intent(this, BagelService::class.java)
+        bindService(serviceIntent, bagelServiceConnection, Context.BIND_AUTO_CREATE)
+    }
+
+    override fun onStop() {
+        if (bagelServiceBound) {
+            unbindService(bagelServiceConnection)
+            bagelServiceBound = false
+        }
+        super.onStop()
+    }
+
+
 }
 
 @Composable
