@@ -11,9 +11,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class BagelsViewModel @Inject constructor() : ViewModel() {
-    private val repository = BagelsRepository()
-
+class BagelsViewModel @Inject constructor(
+    private val repository: BagelsRepository,
+) : ViewModel() {
     var uiState by mutableStateOf(BagelsUiState())
         private set
 
@@ -28,17 +28,13 @@ class BagelsViewModel @Inject constructor() : ViewModel() {
     fun onAddClicked() {
         if (uiState.count >= MaxNumberOfBagels) return
 
-        viewModelScope.launch {
-            repository.increment()
-        }
+        repository.increment()
     }
 
     fun onRemoveClicked() {
         if (uiState.count <= 0) return
 
-        viewModelScope.launch {
-            repository.decrement()
-        }
+        repository.decrement()
     }
 }
 
