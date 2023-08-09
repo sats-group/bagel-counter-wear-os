@@ -10,7 +10,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -30,21 +30,24 @@ import com.google.android.horologist.composables.SegmentedProgressIndicator
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun BagelsScreen() {
-    var numberOfBagels by remember { mutableIntStateOf(8) }
-    val totalBagels = 8
+fun BagelsScreen(
+    uiState: BagelsUiState,
+    onAddClicked: () -> Unit,
+    onRemoveClicked: () -> Unit,
+) {
+    val numberOfBagels = uiState.count
     val startColor = Color(0xFFCE9A32)
     val endColor = Color(0xFF31231D)
-    val progress = numberOfBagels / totalBagels.toFloat()
+    val progress = numberOfBagels / MaxNumberOfBagels.toFloat()
 
-    val trackSegments = List(totalBagels) { index ->
-        ProgressIndicatorSegment(1f, lerp(startColor, endColor, index / (totalBagels - 1f)))
+    val trackSegments = List(MaxNumberOfBagels) { index ->
+        ProgressIndicatorSegment(1f, lerp(startColor, endColor, index / (MaxNumberOfBagels - 1f)))
     }
 
     Box(contentAlignment = Alignment.Center) {
         SegmentedProgressIndicator(
-            trackSegments,
-            progress,
+            trackSegments = trackSegments,
+            progress = progress,
             strokeWidth = 16.dp,
             paddingAngle = 4f,
         )
@@ -58,11 +61,11 @@ fun BagelsScreen() {
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Button(onClick = { numberOfBagels = (numberOfBagels - 1).coerceIn(0, 8) }, colors = buttonColors) {
+                Button(onRemoveClicked, colors = buttonColors) {
                     Icon(Icons.Default.Remove, contentDescription = null)
                 }
 
-                Button(onClick = { numberOfBagels = (numberOfBagels + 1).coerceIn(0, 8) }, colors = buttonColors) {
+                Button(onAddClicked, colors = buttonColors) {
                     Icon(Icons.Default.Add, contentDescription = null)
                 }
             }
@@ -74,6 +77,12 @@ fun BagelsScreen() {
 @Composable
 private fun Preview() {
     Box(Modifier.background(Color.Black)) {
-        BagelsScreen()
+        var uiState by remember { mutableStateOf(BagelsUiState()) }
+
+        BagelsScreen(
+            uiState = uiState,
+            onAddClicked = { uiState = uiState.copy(count = uiState.count + 1) },
+            onRemoveClicked = { uiState = uiState.copy(count = uiState.count - 1) },
+        )
     }
 }
